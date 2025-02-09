@@ -1,58 +1,44 @@
 package tests;
 
-import java.util.List;
+import java.util.HashMap;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import testCompnents.BaseTest;
-import webPages.Loopper;
 
 public class CreateOffer extends BaseTest {
 
-	@Test
-	public void createOffer() throws InterruptedException {
-		WebElement clothing = driver
-				.findElement(By.xpath("//div[@class='loopper_main_menu_div_container ']/div[4]/span"));
+	@Test(dataProvider = "getData")
+	public void createOffer(HashMap<String, String> m) throws InterruptedException {
+		loopper.goToMainMenu(m.get("menu"));
+		loopper.clickOnSubCategory(m.get("category"), m.get("subCategory"));
+		loopper.clickOnOfferButton(m.get("product"));
+		loopper.inputQuantity(m.get("quantity"));
+		loopper.inputFirstName();
+		loopper.inputLastName();
+		loopper.inputEmail();
+		loopper.clickOnSendMyFreeQuote();
 
-		Actions a = new Actions(driver);
-		a.moveToElement(clothing).build().perform();
+		String msg = loopper.getSuccessMsg();
+		Assert.assertEquals(msg, "Quote request successful!");
+		loopper.closePopUp();
+	}
 
-		WebElement baseballCaps = driver
-				.findElement(By.xpath("//div[@class='menu-row-subtitle']/a[@title='Baseball caps']"));
-		baseballCaps.click();
-		List<WebElement> products = driver
-				.findElements(By.cssSelector(".webshop_store_article_panel_image_container div img"));
-		List<WebElement> offer = driver.findElements(By.xpath("//div/span[@class='loopper_button article_offer_btn']"));
+	@DataProvider
+	public Object[][] getData() {
 
-		for (int i = 0; i < products.size(); i++) {
-			if (products.get(i).getDomAttribute("title").equalsIgnoreCase("Classic cap | Cotton | 5 panels")) {
-				offer.get(i).click();
-				break;
-			}
-		}
+		HashMap<String, String> m1 = new HashMap<String, String>();
+		m1.put("menu", "Clothing");
+		m1.put("category", "Personalized footwear");
+		m1.put("subCategory", "Flip-flops");
+		m1.put("product", "Fully customizable beach flip-flops | PE sole | PVC straps");
+		m1.put("quantity", "50");
 
-		WebElement quantity = driver.findElement(By.xpath("//span[@id='moq_offer_val']//following-sibling::input"));
-		WebElement firstName = driver.findElement(By.cssSelector("input[placeholder='First name *']"));
-		WebElement lastName = driver.findElement(By.cssSelector("input[placeholder='Last name *']"));
-		WebElement email = driver.findElement(By.cssSelector("input[type='email']"));
-		WebElement sendMyFreeQuote = driver.findElement(By.xpath("//span[text()='Send my free quote']"));
+		Object[][] data = { { m1 } };
 
-		quantity.sendKeys("30");
-		firstName.sendKeys("Jyothi");
-		lastName.sendKeys("Krapa");
-		email.sendKeys("Test123@gmail.com");
-		sendMyFreeQuote.click();
-
-		WebElement successMsg = driver.findElement(By.xpath("//h3[text()='Quote request successful!']"));
-		WebElement closePopUp = driver.findElement(By.id("popupCancel"));
-
-		Assert.assertEquals(successMsg.getText(), "Quote request successful!");
-		closePopUp.click();
+		return data;
 
 	}
 
